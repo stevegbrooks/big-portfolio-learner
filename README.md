@@ -1,6 +1,8 @@
 # big-portfolio-learner
 
-Final project for CIS 545 Big Data Analytics
+Final project for CIS 545 Big Data Analytics. 
+
+The project proposal can be found [here](https://docs.google.com/document/d/1jpFaxwhn7syQj1THJNVp7wHw0W0kc132rCYXXk73hac/edit?usp=sharing)
 
 ## Prerequisites and setup
 
