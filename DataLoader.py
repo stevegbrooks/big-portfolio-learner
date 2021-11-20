@@ -1,5 +1,9 @@
 # The 'user interface' for our data loading program.
 
+# This script will - when completed - grab data from the API,
+# then pkg it up into a .zip and upload it to Google Cloud Storage or AWS S3 bucket
+# which will then be the input to the Jupyter notebooks in this repository.
+
 from importlib import reload
 import utils
 reload(utils)
