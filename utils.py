@@ -23,7 +23,7 @@ def get_alpha_key(credentials_file) -> None:
     return credentials["alpha_key"]
 
 
-def yield_stock_data(base_url: str, function: str, symbols: list, api_key: str, output_size = 'compact', max_threads = 5) -> Iterator:
+def yield_alpha_stock_data(base_url: str, function: str, symbols: list, api_key: str, output_size = 'compact', max_threads = 5) -> Iterator:
     """Multi-threaded function for getting stock data from Alpha Vantage API
     Parameters
     -----------
@@ -42,13 +42,23 @@ def yield_stock_data(base_url: str, function: str, symbols: list, api_key: str, 
     for result in executor.map(requests.get, urls):
         yield result.json()
 
-# def to_dataframe(stock_data: Iterator) -> pd.DataFrame:
-#     df = pd.DataFrame()
-#     for i, result in enumerate(stock_data):
-#         for key in result.json():
-#             if key != 'Meta Data':
-#                 temp = response.json()[key]
-#     return df
+def alpha_json_to_dataframe(stock_data: Iterator) -> pd.DataFrame:
+    output = []
+    for i, result in enumerate(stock_data):
+        temp_df = None
+        for key in result:
+            if key != 'Meta Data':
+                temp_df = pd.DataFrame().from_dict(result[key], orient = 'index')
+        if temp_df is not None:
+            temp_df['symbol'] = result['Meta Data']['2. Symbol']
+            temp_df.reset_index(inplace = True)
+            temp_df.rename(columns = {"index":"date"***REMOVED***, inplace = True)
+            #reorder cols so symbol is first
+            cols = list(temp_df.columns)
+            cols = [cols[-1]] + cols[:-1]
+            temp_df = temp_df[cols]
+            output.append(temp_df)
+    return pd.concat(output)
 
 
 #convert to dict of tuples and remove NaN
