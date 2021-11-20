@@ -59,8 +59,3 @@ def alpha_json_to_dataframe(stock_data: Iterator) -> pd.DataFrame:
             temp_df = temp_df[cols]
             output.append(temp_df)
     return pd.concat(output)
-
-
-#convert to dict of tuples and remove NaN
-# categories = {category[0]: tuple(stock for stock in category[1:] if not pd.isna(stock)) \
-#                 for category in list(categories.T.itertuples(index=True)) ***REMOVED***
