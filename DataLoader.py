@@ -18,3 +18,5 @@ stock_data = utils.yield_alpha_stock_data(base_url, function, symbols, api_key)
 stock_data_df = utils.alpha_json_to_dataframe(stock_data)
 
 stock_data_df
+
+utils.yield_alpha_stock_data()
