@@ -9,11 +9,13 @@ from six import Iterator
 import yaml
 import csv
 import re
+import os
 
 ALPHA_BASE_URL = 'https://www.alphavantage.co/query?'
 CONNECT_RETRIES = 3
 BACKOFF_FACTOR = 0.5
 
+###############################################################################################
 def get_alpha_key(credentials_file) -> None:
     """Grabs credentials for Alpha Vantage API from a yaml file
     Parameters
@@ -32,26 +34,6 @@ def get_alpha_key(credentials_file) -> None:
             print(exc)
 
     return credentials["alpha_key"]
-
-def alpha_csv_to_dataframe(response):
-    decoded_content = response.content.decode('utf-8')
-    cr = csv.reader(decoded_content.splitlines(), delimiter=',')
-    df = pd.DataFrame(cr)
-    header, df = df.iloc[0], df[1:]
-    df.columns = header
-    df.reset_index(drop = True, inplace=True)
-    df.columns.name = None
-    return df
-
-def request_alpha_data(url):
-    session = requests.Session()
-    retry = Retry(
-        connect = CONNECT_RETRIES, 
-        backoff_factor = BACKOFF_FACTOR
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('https://', adapter)
-    return session.get(url)
 
 def get_alpha_listings(
     api_key: str, base_url: str = ALPHA_BASE_URL, 
@@ -86,10 +68,20 @@ def get_alpha_listings(
     df = alpha_csv_to_dataframe(response)
     return df
 
+def alpha_csv_to_dataframe(response):
+    decoded_content = response.content.decode('utf-8')
+    cr = csv.reader(decoded_content.splitlines(), delimiter=',')
+    df = pd.DataFrame(cr)
+    header, df = df.iloc[0], df[1:]
+    df.columns = header
+    df.reset_index(drop = True, inplace=True)
+    df.columns.name = None
+    return df
 
+###############################################################################################
 
-def yield_alpha_stock_data(
-    function: str, symbols: Iterable, api_key: str, data_type: str = 'csv',
+def get_alpha_stock_data(
+    function: str, symbols: Iterable, api_key: str,
     base_url: str = ALPHA_BASE_URL, 
     output_size: str = 'compact', max_threads: int = 5
 ) -> Iterator:
@@ -104,8 +96,6 @@ def yield_alpha_stock_data(
         An iterable objects of stock ticker symbols (strings)
     api_key: str
         The Alpha Vantage API key
-    data_type: str
-        one of 'json' or 'csv'. 'csv' is more memory efficient
     output_size: str
         'compact' or 'full'. See AV API docs for more info
     max_threads: int
@@ -115,6 +105,7 @@ def yield_alpha_stock_data(
     Iterator
         a generator object of your API results in the same order as your list of symbols
     """
+    data_type = 'csv' #most memory efficient
     urls = []
     for symbol in symbols:
         sequence = (
@@ -127,17 +118,23 @@ def yield_alpha_stock_data(
 
     executor = ThreadPoolExecutor(max_threads)
     for result in executor.map(request_alpha_data, urls):
-        if data_type == 'json': 
-            yield result.json()
-        elif data_type == 'csv':
-            yield alpha_csv_to_dataframe(result)
-        else: raise Exception("datatype must be one of 'json' or 'csv'")
+        yield alpha_csv_to_dataframe(result)
 
-def join_alpha_results(stock_data: Iterator, symbols: Iterable) -> pd.DataFrame:
-    """Converts elements in an Iterator into a single pandas dataframe with the stock ticker as an added col
+def request_alpha_data(url):
+    session = requests.Session()
+    retry = Retry(
+        connect = CONNECT_RETRIES, 
+        backoff_factor = BACKOFF_FACTOR
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('https://', adapter)
+    return session.get(url)
+
+def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str) -> None:
+    """Writes elements in an Iterator - with the stock ticker as an added column - to a folder as a csv
     Parameters
     -----------
-    stock_data: Iterator
+    results: Iterator
         This should be the raw JSON output from the API as an Iterator object, one element for each symbol
     symbols: Iterable
         An iterable objects of stock ticker symbols (strings)
@@ -147,24 +144,18 @@ def join_alpha_results(stock_data: Iterator, symbols: Iterable) -> pd.DataFrame:
         all the data concatenated into a DataFrame object. 
         The schema will be 'symbol', 'timestamp', followed by whatever cols the API returned
     """
-    output = []
-    for i, result in enumerate(stock_data):
+    os.makedirs(dest_path, exist_ok = True)
+    for i, result in enumerate(results):
         temp_df = None
-        if isinstance(result, dict):
-            temp_df = alpha_json_to_dataframe(result)
-            temp_df = reorder_last_to_first(temp_df)
-        elif isinstance(result, pd.DataFrame):
+        if isinstance(result, pd.DataFrame):
             temp_df = result
             temp_df['symbol'] = symbols[i]
             temp_df = reorder_last_to_first(temp_df)
-        else:
-            raise Exception("stock_data must be an Iterator of JSON or pandas DataFrames")
-        if temp_df is not None:
             temp_df = clean_alpha_cols(temp_df)
-            output.append(temp_df)
+            temp_df.to_csv(os.path.join(dest_path, symbols[i] + '.csv'), index=False)
         else:
-            raise Exception("stock_data has elements with 'None' value")
-    return pd.concat(output)
+            raise Exception("stock_data must be an Iterator of pandas DataFrames")
+    return None
 
 def clean_alpha_cols(df: pd.DataFrame) -> pd.DataFrame:
     """Cleans up column names coming out of the Alpha Vantage API
@@ -196,26 +187,3 @@ def reorder_last_to_first(df: pd.DataFrame) -> pd.DataFrame:
     cols = list(df.columns)
     cols = [cols[-1]] + cols[:-1]
     return df[cols]
-
-def alpha_json_to_dataframe(json_data: dict) -> pd.DataFrame:
-    """ Converts Alpha Vantage raw JSON data to dataframe
-    Parameters
-    -----------
-    json_data: dict
-        a dictionary containing the raw JSON output from the API
-    Returns
-    --------
-    pd.DataFrame
-        schema will always be 'symbol', 'timestamp', followed by whatever cols the API returned
-    """
-    #put non 'meta data' into a df if it exists
-    output = None
-    for key in json_data:
-        if key != 'Meta Data':
-            output = pd.DataFrame().from_dict(json_data[key], orient = 'index')
-    #if there's data, add the relevant meta data in as cols
-    if output is not None:
-        output['symbol'] = json_data['Meta Data']['2. Symbol']
-        output.reset_index(inplace = True)
-        output.rename(columns = {"index" : "timestamp"}, inplace = True)
-    return output
