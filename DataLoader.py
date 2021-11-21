@@ -9,7 +9,7 @@ import utils
 reload(utils)
 
 base_url = 'https://www.alphavantage.co/query?'
-function = 'TIME_SERIES_DAILY'
+function = 'TIME_SERIES_DAILY_ADJUSTED'
 symbols = ['IBM', 'MSFT']
 api_key = utils.get_alpha_key('secrets.yml')
 
