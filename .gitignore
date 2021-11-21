@@ -1,6 +1,8 @@
 
 # Additional Non-template exclusions
 secrets.yml
+*.csv
+*.zip
 
 #### TEMPLATE STUFF BELOW #####
 
