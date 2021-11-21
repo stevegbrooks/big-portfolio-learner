@@ -13,7 +13,8 @@ api_key = au.get_alpha_key('secrets.yml')
 #get all active listings based as of today
 all_active_listings = au.get_alpha_listings(api_key) 
 #only need NYSE and NASDAQ...
-symbols = all_active_listings[all_active_listings.exchange.isin(['NYSE', 'NASDAQ'])]['symbol'].unique()
+all_active_listings = all_active_listings[all_active_listings.exchange.isin(['NYSE', 'NASDAQ'])]
+symbols = all_active_listings['symbol'].unique()
 
 #for testing
 #symbols = ['IBM', 'MSFT']
