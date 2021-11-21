@@ -152,7 +152,8 @@ def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str) ->
     Parameters
     -----------
     results: Iterator
-        This should be the raw JSON output from the API as an Iterator object, one element for each symbol
+        This should be the output from the API as an Iterator object, one pd.DataFrame object 
+        for each symbol in symbols (also in the same order)
     symbols: Iterable
         An iterable objects of stock ticker symbols (strings)
     Returns
