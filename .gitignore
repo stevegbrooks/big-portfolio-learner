@@ -1,3 +1,11 @@
+
+# Additional Non-template exclusions
+secrets.yml
+*.csv
+*.zip
+
+#### TEMPLATE STUFF BELOW #####
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
