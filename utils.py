@@ -1,6 +1,5 @@
 import requests
-from datetime import timedelta
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 from six import Iterator
 import yaml
