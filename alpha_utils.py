@@ -146,13 +146,11 @@ def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str) ->
     """
     os.makedirs(dest_path, exist_ok = True)
     for i, result in enumerate(results):
-        temp_df = None
         if isinstance(result, pd.DataFrame):
-            temp_df = result
-            temp_df['symbol'] = symbols[i]
-            temp_df = reorder_last_to_first(temp_df)
-            temp_df = clean_alpha_cols(temp_df)
-            temp_df.to_csv(os.path.join(dest_path, symbols[i] + '.csv'), index=False)
+            result['symbol'] = symbols[i]
+            result = reorder_last_to_first(result)
+            result = clean_alpha_cols(result)
+            result.to_csv(os.path.join(dest_path, symbols[i] + '.csv'), index=False)
         else:
             raise Exception("stock_data must be an Iterator of pandas DataFrames")
     return None
