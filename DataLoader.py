@@ -8,15 +8,19 @@ from importlib import reload
 import utils
 reload(utils)
 
-base_url = 'https://www.alphavantage.co/query?'
-function = 'TIME_SERIES_DAILY_ADJUSTED'
-symbols = ['IBM', 'MSFT']
 api_key = utils.get_alpha_key('secrets.yml')
 
-stock_data = utils.yield_alpha_stock_data(base_url, function, symbols, api_key)
+all_active_listings = utils.get_alpha_listings(api_key)
+symbols = all_active_listings['symbol']
 
-stock_data_df = utils.alpha_json_to_dataframe(stock_data)
+stock_data = utils.yield_alpha_stock_data(
+    function = 'TIME_SERIES_DAILY_ADJUSTED',
+    symbols = symbols, 
+    api_key = api_key,
+    data_type = 'csv',
+    output_size = 'compact'
+)
 
-stock_data_df
+stock_data = utils.join_alpha_results(stock_data, symbols)
 
-utils.yield_alpha_stock_data()
+stock_data
