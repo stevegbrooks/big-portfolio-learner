@@ -5,13 +5,15 @@ from six import Iterator
 import yaml
 
 def get_alpha_key(credentials_file) -> None:
-    """Grabs credentials for Alpha Vantage API
-
+    """Grabs credentials for Alpha Vantage API from a yaml file
     Parameters
     -----------
     credentials_file: str
         path to .yml file containing credentials
         requires file to contain entries for 'alpha_key:'
+    Returns
+    -----------
+    None
     """
     with open(credentials_file, "r") as stream:
         try:
@@ -38,8 +40,9 @@ def yield_alpha_stock_data(base_url: str, function: str, symbols: list, api_key:
         'compact' or 'full'. See AV API docs for more info
     max_threads: int
         Number of threads for ThreadPool
+    Returns
     --------
-    returns: Iterator
+    Iterator
         a generator object of your API results in the same order as your list of symbols
     """
     urls = []
@@ -58,8 +61,9 @@ def alpha_json_to_dataframe(stock_data: Iterator) -> pd.DataFrame:
     -----------
     stock_data: Iterator
         This should be the raw JSON output from the API as an Iterator object, one element for each symbol
+    Returns
     --------
-    returns: pd.DataFrame
+    pd.DataFrame
         all the data concatenated into a DataFrame object. 
         The schema will be 'symbol', 'date', followed by whatever the API returned
     """
