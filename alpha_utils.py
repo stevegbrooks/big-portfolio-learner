@@ -37,8 +37,7 @@ def get_alpha_key(credentials_file) -> None:
 
 def get_alpha_listings(
     api_key: str, base_url: str = ALPHA_BASE_URL, 
-    date: str = None, state: str = None
-) -> Iterator:
+    date: str = None, state: str = None) -> Iterator:
     """Gets all stock listings from Alpha Vantage
     Parameters
     -----------
@@ -69,6 +68,15 @@ def get_alpha_listings(
     return df
 
 def alpha_csv_to_dataframe(response):
+    """Converts a CSV response from Alpha Vantage to a pandas DataFrame
+    Parameters
+    -----------
+    response: requests.Response
+        a response object from the Alpha Vantage API
+    Returns
+    --------
+    pd.DataFrame
+    """
     decoded_content = response.content.decode('utf-8')
     cr = csv.reader(decoded_content.splitlines(), delimiter=',')
     df = pd.DataFrame(cr)
@@ -83,8 +91,7 @@ def alpha_csv_to_dataframe(response):
 def get_alpha_stock_data(
     function: str, symbols: Iterable, api_key: str,
     base_url: str = ALPHA_BASE_URL, 
-    output_size: str = 'compact', max_threads: int = 5
-) -> Iterator:
+    output_size: str = 'compact', max_threads: int = 5) -> Iterator:
     """Multi-threaded function for getting stock data from Alpha Vantage API
     Parameters
     -----------
@@ -114,13 +121,23 @@ def get_alpha_stock_data(
             '&datatype=', data_type
         )
         urls.append(''.join(map(str, sequence)))
-    urls
 
     executor = ThreadPoolExecutor(max_threads)
     for result in executor.map(request_alpha_data, urls):
         yield alpha_csv_to_dataframe(result)
 
 def request_alpha_data(url):
+    """ 
+    Makes a request to the Alpha Vantage API and returns the response
+    Uses retry logic to handle connection errors
+    Parameters
+    -----------
+    url: str
+        the url to request
+    Returns
+    --------
+    requests.Response
+    """
     session = requests.Session()
     retry = Retry(
         connect = CONNECT_RETRIES, 
