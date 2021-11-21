@@ -1,11 +1,18 @@
 from typing import Iterable
 import requests
+from requests.adapters import HTTPAdapter
+from requests.api import request
+from urllib3.util.retry import Retry
 from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 from six import Iterator
 import yaml
 import csv
 import re
+
+ALPHA_BASE_URL = 'https://www.alphavantage.co/query?'
+CONNECT_RETRIES = 3
+BACKOFF_FACTOR = 0.5
 
 def get_alpha_key(credentials_file) -> None:
     """Grabs credentials for Alpha Vantage API from a yaml file
@@ -36,8 +43,18 @@ def alpha_csv_to_dataframe(response):
     df.columns.name = None
     return df
 
+def request_alpha_data(url):
+    session = requests.Session()
+    retry = Retry(
+        connect = CONNECT_RETRIES, 
+        backoff_factor = BACKOFF_FACTOR
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('https://', adapter)
+    return session.get(url)
+
 def get_alpha_listings(
-    api_key: str, base_url: str = 'https://www.alphavantage.co/query?', 
+    api_key: str, base_url: str = ALPHA_BASE_URL, 
     date: str = None, state: str = None
 ) -> Iterator:
     """Gets all stock listings from Alpha Vantage
@@ -73,7 +90,7 @@ def get_alpha_listings(
 
 def yield_alpha_stock_data(
     function: str, symbols: Iterable, api_key: str, data_type: str = 'csv',
-    base_url: str = 'https://www.alphavantage.co/query?', 
+    base_url: str = ALPHA_BASE_URL, 
     output_size: str = 'compact', max_threads: int = 5
 ) -> Iterator:
     """Multi-threaded function for getting stock data from Alpha Vantage API
@@ -109,7 +126,7 @@ def yield_alpha_stock_data(
     urls
 
     executor = ThreadPoolExecutor(max_threads)
-    for result in executor.map(requests.get, urls):
+    for result in executor.map(request_alpha_data, urls):
         if data_type == 'json': 
             yield result.json()
         elif data_type == 'csv':
