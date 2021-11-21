@@ -4,11 +4,18 @@
 # then pkg it up into a .zip. We then manually upload it to AWS S3 bucket (s3://cis545project/data/).
 # which will then be the input to the Jupyter notebooks in this repository.
 
+import shutil
+import os
+
 from importlib import reload
 import alpha_utils as au
 reload(au)
 
+output_path = "stock_data"
 api_key = au.get_alpha_key('secrets.yml')
+
+
+############### GET TICKER SYMBOLS ###############
 
 #get all active listings based as of today
 all_active_listings = au.get_alpha_listings(api_key) 
@@ -21,6 +28,8 @@ symbols = all_active_listings['symbol'].unique()
 
 symbols = symbols[:160]
 
+############### GET STOCK DATA ###################
+
 #returns a generator, so the calls don't happen until 'write_alpha_results' is called
 stock_data = au.get_alpha_stock_data(
     function = 'TIME_SERIES_DAILY_ADJUSTED',
@@ -30,9 +39,22 @@ stock_data = au.get_alpha_stock_data(
     max_threads = 7
 )
 
+############### WRITE STOCK DATA #################
+
 au.write_alpha_results(
     results = stock_data, 
     symbols = symbols,
-    dest_path = "stock_data/"
+    dest_path = output_path
 )
 
+shutil.make_archive(
+    base_name = output_path, 
+    format = 'zip', 
+    root_dir = output_path
+)
+
+############### PRINT RESULTS ###################
+
+print(output_path + "/", "contains", len(os.listdir(output_path)), "files.")
+zip_size = os.path.getsize(output_path + '.zip')
+print("Zipped data size:", round(zip_size / (1024 * 1024), 2), "MB")
