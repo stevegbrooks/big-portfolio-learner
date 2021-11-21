@@ -1,4 +1,4 @@
-# big-portfolio-learner
+# big-portfolio-learner v0.1.0
 
 Final project for CIS 545 Big Data Analytics. 
 
