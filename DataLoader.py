@@ -55,6 +55,10 @@ shutil.make_archive(
 
 ############### PRINT RESULTS ###################
 
-print(output_path + "/", "contains", len(os.listdir(output_path)), "files.")
+#num files
+files = [f for f in os.listdir(output_path) if not f.startswith('.')]
+print(output_path + "/", "contains", len(files), "files.")
+
+#size of .zip output
 zip_size = os.path.getsize(output_path + '.zip')
 print("Zipped data size:", round(zip_size / (1024 * 1024), 2), "MB")
