@@ -16,6 +16,8 @@ The project proposal can be found [here](https://docs.google.com/document/d/1jpF
 
 Contains the interface for loading data from Alpha Vantage API
 
+For documentation of the Alpha Vantage API, please go (here)[https://www.alphavantage.co/documentation/]
+
 ## utils.py
 
 Contains utility functions for grabbing data from Alpha Vantage API
