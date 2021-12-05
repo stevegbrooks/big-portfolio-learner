@@ -5,6 +5,7 @@
 # which will then be the input to the Jupyter notebooks in this repository.
 
 import shutil
+import random
 import os
 
 from importlib import reload
@@ -25,8 +26,8 @@ symbols = all_active_listings['symbol'].unique()
 
 #for testing
 #symbols = ['IBM', 'MSFT', 'FB', 'AAPL', 'QQQ', 'AAP', 'GSPY', 'GUNR']
-
-symbols = symbols[:160]
+rand_sample = random.sample(range(len(symbols)), k = 100)
+symbols = symbols[rand_sample]
 
 ############### GET STOCK DATA ###################
 
@@ -35,7 +36,7 @@ stock_data = au.get_alpha_stock_data(
     function = 'TIME_SERIES_DAILY_ADJUSTED',
     symbols = symbols, 
     api_key = api_key,
-    output_size = 'compact',
+    output_size = 'full',
     max_threads = 7
 )
 
