@@ -120,6 +120,52 @@ def get_alpha_stock_data(
     for result in executor.map(request_alpha_data, urls):
         yield alpha_csv_to_dataframe(result)
 
+def get_alpha_technical_data(
+    function: str, symbols: Iterable, api_key: str,
+    base_url: str = ALPHA_BASE_URL, 
+    interval: str = 'daily', time_period: int = 60, series_type: str = 'close', 
+    max_threads: int = 5
+) -> Iterator:
+    """Multi-threaded function for getting technical data from Alpha Vantage API
+    Parameters
+    -----------
+    base_url: str
+        the alpha vantage URL for the API
+    function: str
+        the 'function' or endpoint you want to call. See AV API docs for more info.
+    symbols: Iterable
+        An iterable objects of stock ticker symbols (strings)
+    api_key: str
+        The Alpha Vantage API key
+    interval: str
+        1min, 5min, 15min, 30min, 60min, daily, weekly, monthly.   
+    time_period: int
+        Number of data points used to calculate each moving average value. 
+    series_type: str
+        The desired price type in the time series. Four types are supported: close, open, high, low
+    max_threads: int
+        Number of threads for ThreadPool
+    Returns
+    --------
+    Iterator
+        a generator object of your API results in the same order as your list of symbols
+    """
+    data_type = 'csv' #most memory efficient
+    urls = []
+    for symbol in symbols:
+        sequence = (
+            base_url, 'function=', function, '&symbol=', symbol, 
+            '&interval=', interval, '&time_period=', time_period, 
+            '&series_type=', series_type, '&apikey=', api_key, '&datatype=', data_type
+        )
+        urls.append(''.join(map(str, sequence)))
+    urls
+
+    executor = ThreadPoolExecutor(max_threads)
+    for result in executor.map(request_alpha_data, urls):
+        yield alpha_csv_to_dataframe(result)
+
+
 def request_alpha_data(url):
     session = requests.Session()
     retry = Retry(
