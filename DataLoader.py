@@ -17,7 +17,7 @@ api_key = au.get_alpha_key('secrets.yml')
 # symbols = all_active_listings['symbol'].unique()
 
 #for testing
-symbols = ['IBM', 'MSFT', 'FB', 'AAPL', 'QQQ', 'AAP', 'ATHM', 'VIPS']
+symbols = ['IBM', 'MSFT', 'FB']
 
 #returns a generator, so the calls don't happen until 'write_alpha_results' is called
 stock_data = au.get_alpha_stock_data(
@@ -28,16 +28,17 @@ stock_data = au.get_alpha_stock_data(
     max_threads = 7
 )
 
-sma_data = au.get_alpha_technical_data(
-    function = 'SMA',
-    symbols = symbols, 
+technical_data = au.get_alpha_technical_data(
+    functions = [
+        'SMA', 'EMA', 'MACD', 'STOCH', 'RSI', 'BBANDS'
+    ],
+    symbols = symbols,
+    api_key = api_key,
     interval = 'daily',
     time_period = 60, 
     series_type = 'close', 
-    api_key = api_key,
     max_threads = 7
 )
-
 
 au.write_alpha_results(
     results = stock_data, 
@@ -46,8 +47,7 @@ au.write_alpha_results(
 )
 
 au.write_alpha_results(
-    results = sma_data, 
+    results = technical_data, 
     symbols = symbols,
     dest_path = "technical_data/"
 )
-
