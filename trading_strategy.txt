@@ -1,0 +1,29 @@
+This file explains our trading stategy.  
+
+Our purpose is to develop a trading stategy that construct and maintains a portfolio that yield the best absolute return.  
+
+Constraints and desciplines: 
+1. We will start with US$100 million and maintain a portfolio of about 50 stocks, i.e. $2 million on each stock on average.  
+2. We maintain the overall stock position to be in 70-100% range.  No single stock will account for more than 15% of total value.  
+3. We don't do margin financing or short selling.  
+4. We do no more than 200 trades each month and each trade cost 0.05% of transaction value or $100 whichever is higher.  
+5. We either buy or sell certain numbers of a particular stock in one trading day.  No high-frequency trading.  
+6. We transact at the end of a trading day, i.e. always use closing price.  
+
+Benchmarks: 
+1. We benchmark S&P500 and evaluate portfolio performance mainly based on the difference of portfolio return and S&P500 return over the same testing period.  
+2. We also consider portfolio risk to be the largest retreats over 1M, 3M, 6M periods.  
+
+Model and stock selection: 
+1. Our model provides estimate of a particular stock performance in the next 10D, 1M, 3M periods based on a number of features
+2. Every trading day, we run our model on a list of stocks (for example, we only pick S&P500 index stocks)
+3. We pick out the projected top 5 most upside potential stocks and bottom 50 most downside potential stocks.  
+4. Overweight the top 5 most upside potential stocks by: 
+    > buying XX numbers of shares that amounts to 1/50 of fund value, if it's not in the portfolio yet; 
+    > hold this stock position, if it's already in the portfolio.  
+5. Underweight the bottom 50 most downside potential stocks by: 
+    > selling all the shares of this particular stock, if it's in the portfolio; 
+    > do nothing if it's not in the portfolio.  
+
+
+
