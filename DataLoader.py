@@ -26,7 +26,7 @@ symbols = all_active_listings['symbol'].unique()
 
 #for testing
 #symbols = ['IBM', 'MSFT', 'FB', 'AAPL', 'QQQ', 'AAP', 'GSPY', 'GUNR']
-rand_sample = random.sample(range(len(symbols)), k = 5)
+rand_sample = random.sample(range(len(symbols)), k = 100)
 symbols = symbols[rand_sample]
 
 ############### GET STOCK DATA ###################
