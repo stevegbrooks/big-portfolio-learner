@@ -41,6 +41,17 @@ stock_data = au.get_alpha_stock_data(
 )
 
 ############### WRITE STOCK DATA #################
+technical_data = au.get_alpha_technical_data(
+    functions = [
+        'SMA', 'EMA', 'MACD', 'STOCH', 'RSI', 'BBANDS'
+    ],
+    symbols = symbols,
+    api_key = api_key,
+    interval = 'daily',
+    time_period = 60, 
+    series_type = 'close', 
+    max_threads = 7
+)
 
 au.write_alpha_results(
     results = stock_data, 
@@ -63,3 +74,8 @@ print(output_path + "/", "contains", len(files), "files.")
 #size of .zip output
 zip_size = os.path.getsize(output_path + '.zip')
 print("Zipped data size:", round(zip_size / (1024 * 1024), 2), "MB")
+au.write_alpha_results(
+    results = technical_data, 
+    symbols = symbols,
+    dest_path = "technical_data/"
+)
