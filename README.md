@@ -1,4 +1,4 @@
-# big-portfolio-learner v0.4.0
+# big-portfolio-learner v0.5.0
 
 Final project for CIS 545 Big Data Analytics. 
 
@@ -18,11 +18,9 @@ The project proposal can be found [here](https://docs.google.com/document/d/1jpF
 
 Contains the interface for loading data from Alpha Vantage API.
 
-The DataLoader will call the API using a ThreadPoolExecutor. It will then write .csv files (for each stock ticker) to `stock_data/` in the order of the stock ticker symbols passed to it.
+The DataLoader will call the API and write .csv files (for each stock ticker) to the output paths provided in the order of the stock ticker symbols passed to it.
 
-Since each tickers' data is >1000 rows, and there are almost 10,000 tickers, this is the only way to manage it without blowing through our RAM.
-
-The last step is to zip up the `stock_data/` directory so that it can be manually uploaded to our S3 bucket.
+The last step is to zip up the data directories so that it can be manually uploaded to our S3 bucket.
 
 ## alpha_utils.py
 
