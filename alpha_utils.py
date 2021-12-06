@@ -64,8 +64,8 @@ def get_alpha_listings(
     sequence = sequence + ('&apikey=', api_key)
     url = ''.join(map(str, sequence))
     response = requests.get(url)
-    df = alpha_csv_to_dataframe(response)
-    return df
+    df_list = alpha_csv_to_dataframe(response)
+    return df_list[0]
 
 def alpha_csv_to_dataframe(responses):
     output = []
@@ -189,7 +189,7 @@ def get_alpha_technical_data(
     for result_list in executor.map(request_alpha_data, (url_list for url_list in urls)):
         yield alpha_csv_to_dataframe(result_list)
 
-def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str) -> None:
+def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str, max_threads: int = 5) -> None:
     """Writes elements in an Iterator - with the stock ticker as an added column - to a folder as a csv
     Parameters
     -----------
@@ -206,6 +206,7 @@ def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str) ->
         The schema will be 'symbol', 'timestamp', followed by whatever cols the API returned
     """
     os.makedirs(dest_path, exist_ok = True)
+    outputs = {}
     for i, result in enumerate(results):
         symbol_df = None
         if isinstance(result, list) != True:
@@ -221,9 +222,16 @@ def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str) ->
                 symbol_df = temp_df
             else:
                 symbol_df = pd.merge(symbol_df, temp_df, on = ['symbol', 'timestamp'])
+        out_path = os.path.join(dest_path, symbols[i] + '.csv')
+        outputs[out_path] = symbol_df
+    executor = ThreadPoolExecutor(max_threads)
+    for results in executor.map(write_simple_wrapper, outputs.items()):
+        pass
 
-        symbol_df.to_csv(os.path.join(dest_path, symbols[i] + '.csv'), index=False)
-    return None
+def write_simple_wrapper(d):
+    key, value = d[0], d[1]
+    value.to_csv(key, index = False)
+
 
 ##########################################################################################
 

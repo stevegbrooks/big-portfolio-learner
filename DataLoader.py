@@ -12,9 +12,9 @@ from importlib import reload
 import alpha_utils as au
 reload(au)
 
-output_path = "stock_data"
+stock_output_path = "stock_data"
+tech_output_path = "technical_data"
 api_key = au.get_alpha_key('secrets.yml')
-
 
 ############### GET TICKER SYMBOLS ###############
 
@@ -26,7 +26,7 @@ symbols = all_active_listings['symbol'].unique()
 
 #for testing
 #symbols = ['IBM', 'MSFT', 'FB', 'AAPL', 'QQQ', 'AAP', 'GSPY', 'GUNR']
-rand_sample = random.sample(range(len(symbols)), k = 100)
+rand_sample = random.sample(range(len(symbols)), k = 5)
 symbols = symbols[rand_sample]
 
 ############### GET STOCK DATA ###################
@@ -56,26 +56,42 @@ technical_data = au.get_alpha_technical_data(
 au.write_alpha_results(
     results = stock_data, 
     symbols = symbols,
-    dest_path = output_path
+    dest_path = stock_output_path
+)
+
+au.write_alpha_results(
+    results = technical_data, 
+    symbols = symbols,
+    dest_path = tech_output_path
 )
 
 shutil.make_archive(
-    base_name = output_path, 
+    base_name = stock_output_path, 
     format = 'zip', 
-    root_dir = output_path
+    root_dir = stock_output_path
+)
+
+shutil.make_archive(
+    base_name = tech_output_path, 
+    format = 'zip', 
+    root_dir = tech_output_path
 )
 
 ############### PRINT RESULTS ###################
 
 #num files
-files = [f for f in os.listdir(output_path) if not f.startswith('.')]
-print(output_path + "/", "contains", len(files), "files.")
+files = [f for f in os.listdir(stock_output_path) if not f.startswith('.')]
+print(stock_output_path + "/", "contains", len(files), "files.")
 
 #size of .zip output
-zip_size = os.path.getsize(output_path + '.zip')
+zip_size = os.path.getsize(stock_output_path + '.zip')
 print("Zipped data size:", round(zip_size / (1024 * 1024), 2), "MB")
-au.write_alpha_results(
-    results = technical_data, 
-    symbols = symbols,
-    dest_path = "technical_data/"
-)
+
+#num files
+files = [f for f in os.listdir(tech_output_path) if not f.startswith('.')]
+print(tech_output_path + "/", "contains", len(files), "files.")
+
+#size of .zip output
+zip_size = os.path.getsize(tech_output_path + '.zip')
+print("Zipped data size:", round(zip_size / (1024 * 1024), 2), "MB")
+
