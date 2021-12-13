@@ -189,6 +189,45 @@ def get_alpha_technical_data(
     for result_list in executor.map(request_alpha_data, (url_list for url_list in urls)):
         yield alpha_csv_to_dataframe(result_list)
 
+def get_alpha_financial_data(
+    functions: Iterable, symbols: Iterable, api_key: str,
+    base_url: str = ALPHA_BASE_URL, max_threads: int = 5
+) -> Iterator:
+    """Multi-threaded function for getting financial data from Alpha Vantage API
+    This wrapper is for the functions in "Fundamental Data" (see AV API docs).
+    Parameters
+    -----------
+    functions: Iterable
+        A list of functions or endpoints you want to call. See AV API docs for more info.
+    symbols: Iterable
+        An iterable objects of stock ticker symbols (strings)
+    api_key: str
+        The Alpha Vantage API key
+    base_url: str
+        the alpha vantage URL for the API
+    max_threads: int
+        Number of threads for ThreadPool
+    Returns
+    --------
+    Iterator
+        a generator object of your API results in the same order as your list of symbols
+    """
+    data_type = 'csv' #most memory efficient
+    urls = []
+    for symbol in symbols:
+        url_list = []
+        for function in functions:
+            sequence = (
+                base_url, 'function=', function, '&symbol=', symbol, '&apikey=', api_key, 
+            )
+            url_list.append(''.join(map(str, sequence)))
+        urls.append(url_list)
+
+    executor = ThreadPoolExecutor(max_threads)
+    for result_list in executor.map(request_alpha_data, (url_list for url_list in urls)):
+        yield alpha_csv_to_dataframe(result_list)
+
+
 def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str, max_threads: int = 5) -> None:
     """Writes elements in an Iterator - with the stock ticker as an added column - to a folder as a csv
     Parameters

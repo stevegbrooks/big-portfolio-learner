@@ -14,6 +14,7 @@ reload(au)
 
 stock_output_path = "stock_data"
 tech_output_path = "technical_data"
+fin_output_path = "financial_data"
 api_key = au.get_alpha_key('secrets.yml')
 
 ############### GET TICKER SYMBOLS ###############
@@ -25,7 +26,7 @@ all_active_listings = all_active_listings[all_active_listings.exchange.isin(['NY
 symbols = all_active_listings['symbol'].unique()
 
 #for testing
-#symbols = ['IBM', 'MSFT', 'FB', 'AAPL', 'QQQ', 'AAP', 'GSPY', 'GUNR']
+#symbols = ['AMZN', 'IBM', 'MSFT', 'FB', 'AAPL', 'GOOG', 'NVDA', 'COST', 'WMT', 'ADP', 'SOHU', 'BIDU']
 rand_sample = random.sample(range(len(symbols)), k = 100)
 symbols = symbols[rand_sample]
 
@@ -40,10 +41,9 @@ stock_data = au.get_alpha_stock_data(
     max_threads = 7
 )
 
-############### WRITE STOCK DATA #################
 technical_data = au.get_alpha_technical_data(
     functions = [
-        'SMA', 'EMA', 'MACD', 'STOCH', 'RSI', 'BBANDS'
+        'SMA', 'EMA', 'VWAP', 'MACD', 'STOCH', 'RSI', 'ADX', 'CCI', 'AROON', 'BBANDS', 'AD', 'OBV'
     ],
     symbols = symbols,
     api_key = api_key,
@@ -52,6 +52,17 @@ technical_data = au.get_alpha_technical_data(
     series_type = 'close', 
     max_threads = 7
 )
+
+financial_data = au.get_alpha_financial_data(
+    functions = [
+        'INCOME_STATEMENT', 'BALANCE_SHEET', 'CASH_FLOW', 'EARNINGS', 'OVERVIEW', 'LISTING_STATUS', 'EARNINGS_CALENDAR'
+    ],
+    symbols = symbols,
+    api_key = api_key,
+    max_threads = 7
+)
+
+############### WRITE STOCK DATA #################
 
 au.write_alpha_results(
     results = stock_data, 
@@ -65,6 +76,12 @@ au.write_alpha_results(
     dest_path = tech_output_path
 )
 
+au.write_alpha_results(
+    results = financial_data, 
+    symbols = symbols,
+    dest_path = fin_output_path
+)
+
 shutil.make_archive(
     base_name = stock_output_path, 
     format = 'zip', 
@@ -75,6 +92,12 @@ shutil.make_archive(
     base_name = tech_output_path, 
     format = 'zip', 
     root_dir = tech_output_path
+)
+
+shutil.make_archive(
+    base_name = fin_output_path, 
+    format = 'zip', 
+    root_dir = fin_output_path
 )
 
 ############### PRINT RESULTS ###################
@@ -93,5 +116,13 @@ print(tech_output_path + "/", "contains", len(files), "files.")
 
 #size of .zip output
 zip_size = os.path.getsize(tech_output_path + '.zip')
+print("Zipped data size:", round(zip_size / (1024 * 1024), 2), "MB")
+
+#num files
+files = [f for f in os.listdir(fin_output_path) if not f.startswith('.')]
+print(fin_output_path + "/", "contains", len(files), "files.")
+
+#size of .zip output
+zip_size = os.path.getsize(fin_output_path + '.zip')
 print("Zipped data size:", round(zip_size / (1024 * 1024), 2), "MB")
 
