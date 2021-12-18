@@ -4,9 +4,9 @@ Our purpose is to develop a trading stategy that construct and maintains a portf
 
 Constraints and desciplines: 
 1. We will start with US$100 million and maintain a portfolio of about 50 stocks, i.e. $2 million on each stock on average.  
-2. We maintain the overall stock position to be in 70-100% range.  No single stock will account for more than 15% of total value.  
+2. We maintain the overall stock position to be 100% (i.e. spend every dollar without cash balance).  No single stock will account for more than 15% of total value.  
 3. We don't do margin financing or short selling.  
-4. We do no more than 200 trades each month and each trade cost 0.05% of transaction value or $100 whichever is higher.  
+4. We do no more than 40 trades each day and assume no transaction cost.  
 5. We either buy or sell certain numbers of a particular stock in one trading day.  No high-frequency trading.  
 6. We transact at the end of a trading day, i.e. always use closing price.  
 
@@ -14,16 +14,28 @@ Benchmarks:
 1. We benchmark S&P500 and evaluate portfolio performance mainly based on the difference of portfolio return and S&P500 return over the same testing period.  
 2. We also consider portfolio risk to be the largest retreats over 1M, 3M, 6M periods.  
 
-Model and stock selection: 
-1. Our model provides estimate of a particular stock performance in the next 10D, 1M, 3M periods based on a number of features
-2. Every trading day, we run our model on a list of stocks (for example, we only pick S&P500 index stocks)
-3. We pick out the projected top 5 most upside potential stocks and bottom 50 most downside potential stocks.  
-4. Overweight the top 5 most upside potential stocks by: 
-    > buying XX numbers of shares that amounts to 1/50 of fund value, if it's not in the portfolio yet; 
-    > hold this stock position, if it's already in the portfolio.  
-5. Underweight the bottom 50 most downside potential stocks by: 
-    > selling all the shares of this particular stock, if it's in the portfolio; 
-    > do nothing if it's not in the portfolio.  
+Model: 
+1. Our model is built on general stock performance with respect to a number of features without refering to any particular stock.  
+2. The model is based on the following dependent variable Y and independent variable X: 
+	Y: (1)  Daily adjusted closing price % change of 500 stocks from 2002 to 2019
+	X: (4)  Last-twelve-month (LTM) price-to-sales (P/S), price-to-earning (P/E), price-to-book (P/B), price-to-cashflow (P/CF) ratio of each quarter
+	   (3)  Quarterly revenue, adjusted earning, cash flow yoy growth rate (convert quarterly to daily)
+	   (12) Prior day technical indicators of respective stock, including SMA, EMA, VWAP, MACD, STOCH, RSI, ADX, CCI, AROON, BBANDS, AD, OBV
+	   (5)  Overnight stock index performance of other major stock markets, e.g. Nikkei, DAX, FTSE, HKSE, SHSE.  
+	   (6)  Other market daily performance, including Tresaury Bond (1-yr, 3yr, 10-yr), forex market (USD/EUR, USD/JPY, USD/AUD)
+	   (2)  Economic data, including monthly unemployment rate (converted to daily), monthly yoy GDP growth (converted to daily)
+	Total 32 independent variables.  
+3. We should have a dataframe of 35 columns (stock code, stock price, % price change + 32 features) and 2.25 million rows (500 stocks * 18 year * 250 trading days)
+4. We run a linear regression model with daily numbers for 500 stocks and develop a model Y ~ 32X
+5. Use 2002-2017 15-year data as training set, and test on 2018-2019.  
+
+Corresponding trading Strategy: 
+1. Everyday, our model shall tell us the estimated daily price change for each of the 500 stock based on testing data of 32 features.  
+2. Sell the lowest 20 projected price change stock in the portfolio and receive XXX cash proceeds.  
+3. Use the cash proceeds to buy the highest 20 projected price change stock with equal allocation.  
+4. Sell 20 and buy 20 everyday, maintain a portfolio of 50 stocks.  
+5. Calculate the absolute return from the portfolio and benchmark with S&P500.  
+
 
 
 
