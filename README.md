@@ -16,11 +16,11 @@ The project proposal can be found [here](https://docs.google.com/document/d/1jpF
 
 ## Analysis and Portfolio Learner
 
-### big_portfolio_learner.ipynb
+### *.ipynb
 
-A iPython notebook designed to run on Google CoLab.
+iPython notebooks designed to run on Google CoLab.
 
-This notebook pulls the data from an S3 bucket, cleans and munges it, does some Exploratory Data Analysis, and finally implements the core logic of predicting which stocks to invest in.
+These notebook pull the data from an S3 bucket, does some Exploratory Data Analysis, leans and munges, and finally implements the core logic of predicting which stocks to invest in using time series analysis.
 
 ## Pulling data from the Alpha Vantage API
 
