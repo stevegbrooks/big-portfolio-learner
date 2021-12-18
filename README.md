@@ -1,4 +1,4 @@
-# big-portfolio-learner v0.5.3
+# big-portfolio-learner v0.7.0
 
 Final project for CIS 545 Big Data Analytics. 
 
@@ -14,7 +14,17 @@ The project proposal can be found [here](https://docs.google.com/document/d/1jpF
 
 - install packages using `pip install -r requirements.txt` or `sudo -H pip install -r requirements.txt`.
 
-## DataLoader.py
+## Analysis and Portfolio Learner
+
+### big_portfolio_learner.ipynb
+
+A iPython notebook designed to run on Google CoLab.
+
+This notebook pulls the data from an S3 bucket, cleans and munges it, does some Exploratory Data Analysis, and finally implements the core logic of predicting which stocks to invest in.
+
+## Pulling data from the Alpha Vantage API
+
+### DataLoader.py
 
 Contains the interface for loading data from Alpha Vantage API.
 
@@ -22,6 +32,6 @@ The DataLoader will call the API and write .csv files (for each stock ticker) to
 
 The last step is to zip up the data directories so that it can be manually uploaded to our S3 bucket.
 
-## alpha_utils.py
+### alpha_utils.py
 
 Contains utility functions for grabbing data from Alpha Vantage API.
