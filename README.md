@@ -20,7 +20,7 @@ The project proposal can be found [here](https://docs.google.com/document/d/1jpF
 
 iPython notebooks designed to run on Google CoLab.
 
-These notebook pull the data from an S3 bucket, does some Exploratory Data Analysis, leans and munges, and finally implements the core logic of predicting which stocks to invest in using time series analysis.
+These notebook pull the data from an S3 bucket, do some Exploratory Data Analysis, clean and munges the data, and finally implements the core logic of predicting which stocks to invest in using time series analysis.
 
 ## Pulling data from the Alpha Vantage API
 
