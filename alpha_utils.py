@@ -189,7 +189,7 @@ def get_alpha_technical_data(
     for result_list in executor.map(request_alpha_data, (url_list for url_list in urls)):
         yield alpha_csv_to_dataframe(result_list)
 
-def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str, max_threads: int = 5) -> None:
+def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str, columns: Iterable = None, max_threads: int = 5) -> None:
     """Writes elements in an Iterator - with the stock ticker as an added column - to a folder as a csv
     Parameters
     -----------
@@ -199,6 +199,11 @@ def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str, ma
         where each DataFrame in that sub-list corresponds to a function in functions.
     symbols: Iterable
         An iterable object of stock ticker symbols (strings)
+    dest_path: str
+        Where to write the results to
+    columns: Iterable
+        An iterable object of column names to restrict the written DataFrame to.
+        If left as None (the default), all columns will be written.
     Returns
     --------
     pd.DataFrame
@@ -223,6 +228,8 @@ def write_alpha_results(results: Iterator, symbols: Iterable, dest_path: str, ma
             else:
                 symbol_df = pd.merge(symbol_df, temp_df, on = ['symbol', 'timestamp'])
         out_path = os.path.join(dest_path, symbols[i] + '.csv')
+        if columns is not None:
+            symbol_df = symbol_df[columns]
         outputs[out_path] = symbol_df
     executor = ThreadPoolExecutor(max_threads)
     for results in executor.map(write_simple_wrapper, outputs.items()):
