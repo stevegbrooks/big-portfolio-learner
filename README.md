@@ -16,9 +16,9 @@ The project proposal can be found [here](https://docs.google.com/document/d/1jpF
 
 ## Analysis and Portfolio Learner
 
-### *.ipynb
+### `notebooks/*.ipynb`
 
-iPython notebooks designed to run on Google CoLab.
+The subdirectory `notebooks/` contains the iPython notebooks designed to run on Google CoLab.
 
 These notebook pull the data from an S3 bucket, do some Exploratory Data Analysis, clean and munges the data, and finally implements the core logic of predicting which stocks to invest in using time series analysis.
 
