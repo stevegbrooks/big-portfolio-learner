@@ -22,6 +22,8 @@ The subdirectory `notebooks/` contains the iPython notebooks designed to run on 
 
 These notebook pull the data from an S3 bucket, do some Exploratory Data Analysis, clean and munges the data, and finally implements the core logic of predicting which stocks to invest in using time series analysis.
 
+_NOTE:_ Due to the time constraints, we were only able to finish up to `step3a_single_tsa.ipynb` where we implement a time series analysis on a single stock. `step3b_global_tsa.ipynb` was intended to implement a global time series analysis on all stocks' time series, but wasn't finished.
+
 ## Pulling data from the Alpha Vantage API
 
 ### DataLoader.py
